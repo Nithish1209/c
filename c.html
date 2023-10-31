@@ -1,0 +1,460 @@
+<html>
+<body>
+      <pre>
+	         1.yacc program binary to decimal(dec to bi/dec to oct/oct to dec)
+vi bitodec.l
+%{
+#include"y.tab.h"
+extern int yylval;
+%}
+%%
+[0-1]+ {yylval=atoi(yytext);
+return num;}
+¥n return 0;
+%%
+vi bitodec.y
+%{
+#include<stdio.h>
+int x,t,r,n;
+%}
+%token num;
+%%
+state:num {x=$1;
+t=1;
+n=0;
+while(x!=0)
+{
+r=x%10;
+n=n+r*t;
+t=t*2;
+x=x/10;
+}
+printf("%d",n);
+}
+%%
+int main()
+{
+printf("Enter string¥n");
+if(!yyparse())
+{
+printf("¥nValid");
+exit(0);
+}
+}
+int yyerror()
+{
+printf("¥ninvalid");
+return 1;
+}
+int yywarp()
+{
+return 1;
+}
+2.yacc program to evaluate arthimetic expression
+vi arithm.l
+%{
+#include"y.tab.h"
+extern int yylval;
+%}
+%%
+[0-9]+ {yylval=atoi(yytext);
+return num;
+}
+¥n return 0;
+. return yytext[0];
+%%
+vi arithm.y
+%{
+#include<stdio.h>
+%}
+%token num
+%left '-''+'
+%%
+sen:exp {printf("%d",$1);}
+exp:exp'-'exp{$$=$1-$3;}
+|exp'+'exp {$$=$1+$3;}
+|num {$$=$1;}
+%%
+int main()
+{
+printf("Enter string¥n");
+if(!yyparse())
+{
+printf("¥nValid");
+exit(0);
+}
+}
+int yyerror()
+{
+printf("¥ninvalid");
+return 1;
+}
+int yywarp()
+{
+return 1;
+}
+3.yacc program to accept the grammar of form a^nb^n
+vi abgrammar.l
+%{
+#include"y.tab.h"
+%}
+%%
+[a] return A;
+[b] return B;
+. return yytext[0];
+¥n return yytext[0];
+%%
+vi abgrammar.y
+%{
+#include<stdio.h>
+%}
+%token A B
+%%
+input:expr'¥n' {return 0;}
+expr:X
+X:
+|A X B;
+%%
+int main()
+{
+printf("Enter string¥n");
+if(!yyparse())
+{
+printf("¥nValid");
+exit(0);
+}
+}
+int yyerror()
+{
+printf("¥ninvalid");
+return 1;
+}
+int yywarp()
+{
+return 1;
+}
+4.yacc program to identify balanced paranthesis
+vi balpar.l
+%{
+#include"y.tab.h"
+%}
+%%
+"(" return OPEN;
+")" return CLOSE;
+¥n|. return yytext[0];
+%%
+vi balpar.y
+%{
+#include<stdio.h>
+%}
+%token OPEN CLOSE
+%%
+line:S'¥n' {printf("OK¥n");}
+;
+S:
+|OPEN S CLOSE S
+;
+%%
+int main()
+{
+printf("Enter string¥n");
+if(!yyparse())
+{
+printf("¥nValid");
+exit(0);
+}
+}
+int yyerror()
+{
+printf("¥ninvalid");
+return 1;
+}
+int yywarp()
+{
+return 1;
+}
+5.yacc program validate date
+vi date.l
+%{
+#include"y.tab.h"
+extern int yylval;
+%}
+%%
+[0-9]+ {yylval=atoi(yytext);
+return NUM;}
+"¥/" return SLASH;
+"¥n" return NL;
+%%
+vi date.y
+%{
+#include<stdio.h>
+%}
+%token NUM SLASH NL
+%%
+date: NUM SLASH NUM SLASH NUM NL {if(($1>=1 && $1<=31)&&($3>=1 && $3<=12)&&($5>=1900))
+printf("OK");}
+%%
+int main()
+{
+printf("Enter Date: ");
+if(!yyparse())
+{
+printf("¥nValid Date");
+exit(0);
+}
+}
+int yyerror()
+{
+printf("¥nInvalid Date");
+return 1;
+}
+int yywrap()
+{
+return 1;
+}
+6.yacc program to check validity of given sentence
+vi senval.l
+%{
+#include"y.tab.h"
+%}
+%%
+read|are|play|is|run return verb;
+Ram|Raj|Sita return noun;
+He|She return pronoun;
+¥n return 0;
+%%
+vi senval.y
+%{
+#include<stdio.h>
+%}
+%token noun pronoun verb
+%%
+Sen:S /*{printf("Valid sentence");}*/;
+S:pronoun verb noun
+%%
+int main()
+{
+printf("Enter string¥n");
+if(!yyparse())
+{
+printf("¥nValid");
+exit(0);
+}
+}
+int yyerror()
+{
+printf("¥ninvalid");
+return 1;
+}
+int yywarp()
+{
+return 1;
+}
+lex programs::
+1.lex program to add line number to given input
+vi lineno.l
+%{
+int lineno=1;
+%}
+line .*¥n
+%%
+{line} {printf("%5d %s",lineno++,yytext);}
+%%
+main()
+{
+yylex();
+return 0;
+}
+2.lex program to count the no.of lines,words and characters in given input text
+vi countlwc.l
+%{
+int lines=0,words=0,characters=0;
+%}
+newline [¥n]
+whitespace [ ¥t]
+%%
+{newline} {lines++;words++;}
+{whitespace} {words++;}
+. {characters++;}
+%%
+int main()
+{
+yylex();
+printf("%d %d %d", lines, words, characters);
+}
+3.lex program to count number of comment lines in given input
+vi countcomm.l
+%{
+#include<stdio.h>
+int c=0;
+%}
+%%
+#.* {c++;}
+"/*"[a-zA-Z0-9' '¥t¥n]*"*/" c++;
+%%
+main()
+{
+yylex();
+printf("The no.of comment lines are %d",c);
+}
+4.lex program to implement lexical analyser/lexical analyser using lex tool
+vi var.c
+#include<stdio.h>
+main()
+{
+int a,b;
+}
+vi lexi.l
+%{
+int COMMENT=0;
+%}
+identifier [a-zA-Z][a-zA-Z0-9]*
+%%
+#.* {printf("¥n%s is a preprocessor directive",yytext);}
+int|float|char|double|while|for|struct|typedef|do|if|break|continue|void|switch|return|else|goto
+{printf("¥n¥t%s is a keyword",yytext);}
+"/*" {COMMENT=1;}{printf("¥n¥t %s is a COMMENT",yytext);}
+{identifier}¥( {if(!COMMENT)printf("¥nFUNCTION ¥n¥t%s",yytext);}
+¥{ {if(!COMMENT)printf("¥n BLOCK BEGINS");}
+¥} {if(!COMMENT)printf("BLOCK ENDS");}
+{identifier}(¥[[0-9]*¥])? {if(!COMMENT) printf("¥n %s IDENTIFIER",yytext);}
+¥".*¥" {if(!COMMENT) printf("¥n¥t %s is a STRING",yytext);}
+[0-9]+ {if(!COMMENT) printf("¥n %s is a NUMBER",yytext);}
+¥)(¥;)? {if(!COMMENT) printf("¥n¥t");ECHO;printf("¥n");}
+¥( ECHO;
+= {if(!COMMENT)printf("¥n¥t %s ASSIGNMENT OPERATOR");}
+¥<=|¥>=|¥>|¥<|¥== {if(!COMMENT) printf("¥n¥t %s RELATIONAL OPERATOR");}
+%%
+int main(int argc,char **argv)
+{
+FILE *file;
+file=fopen("var.c","r");
+if(!file)
+{
+printf("could not open the file");
+exit(0);
+}
+yyin=file;
+yylex();
+printf("¥n");
+return(0);
+}
+int yywrap()
+{
+return(1);
+}
+5.lex program to find frequency of the articles in given input text.
+vi freqart.l
+%{
+int c=0;
+%}
+%%
+[a-zA-Z]+
+{if((strcmp(yytext,"a")==0)|(strcmp(yytext,"an")==0)|(strcmp(yytext,"the")==0)|(strcmp(yytext,"A")==0)
+|(strcmp(yytext,"AN")==0)|(strcmp(yytext,"THE")==0)) c++;
+}
+%%
+main()
+{
+yylex();
+printf("no.of articles = %d",c);
+}
+6.lex program that prints successor and predecessor of the given input symbol
+vi succpree.l
+%%
+[a-zA-Z0-9] {printf("%c, %c",yytext[0]+1,yytext[0]-1);}
+%%
+7.to remove comment lines from the given input
+vi remcomm.l
+%%
+"/*"[a-zA-Z 0-9]+"*/" {printf(" ");}
+%%
+8.to convert real number to integer
+vi realtoint.l
+%%
+"."[0-9]+ {printf(" ");}
+%%
+9.vowels and consonants in given input text
+vi vowcon.l
+%{
+int c1=0,c2=0;
+%}
+%%
+[aeiouAEIOU] {c1++;}
+[a-zA-Z] {c2++;}
+%%
+main()
+{
+yylex();
+printf("no.of vowels:%d",c1);
+printf("no.of consonents:%d",c2);
+}
+10.to find reverse of given input string
+11.lex program that contains no patterns and no actions
+vi nopatnoact.l
+%{
+%}
+%%
+%%
+main()
+{
+yylex();
+return 0;
+}
+12. prints * whenever it recieves the input as 5CSE2
+13.prints positive and negative integer
+14.prnts string when it receieves the input as a sequence of characters
+15.number is palindrome or not
+16.number is armstrong number or not
+17. remove multiple blanks from given input text
+18. lexical analyser without using text files
+19. lexical analyser using text files
+20. identify header file
+21.identify identifiers and keywords
+22. identify constants
+add.c
+#include<stdio.h>
+#include<string.h>
+int main()
+{
+int a,b,sum=0;
+printf("Enter a number");
+scanf("%d",&a);
+printf("Enter another number");
+scanf("%d",&b);
+sum=a+b;
+printf("sum of numbers: %d ", sum);
+return 0;
+}
+vi operators.txt
++-*/%=
+vi operators.c
+#include<stdio.h>
+#include<string.h>
+main()
+{
+char x,y;
+FILE *f1,*f2;
+f1=fopen("add.c","r");
+f2=fopen("operators.txt","r");
+while(!feof(f2))
+{
+x=fgetc(f2);
+while(!feof(f1))
+{
+y=fgetc(f1);
+if(x==' '||x=='¥n'||x==EOF)
+break;
+if(x==y)
+printf("¥n %c is an operator",x);
+}
+rewind(f1);
+}
+fclose(f1);
+fclose(f2);
+}
+23. identify operators
+24. identify special symbols
+</pre>
+</body>
+</html>
